@@ -1,0 +1,13 @@
+.idea/
+.claude/
+.gradle/
+build/
+/data/
+out/
+*.jar
+*.iml
+.env
+.DS_Store
+spring-shell.log
+test.mv.db
+test.trace.db
