@@ -1,3 +1,4 @@
 [submodule "chats-service"]
 	path = chats-service
 	url = https://github.com/psu-minigram-microservices/chats-service
+	branch = main
