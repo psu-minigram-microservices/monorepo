@@ -9,6 +9,7 @@ out/
 *.iml
 .env
 .DS_Store
+Caddyfile
 spring-shell.log
 test.mv.db
 test.trace.db

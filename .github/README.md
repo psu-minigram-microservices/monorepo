@@ -22,7 +22,7 @@ services/         — символьные ссылки на отдельные 
 
 ### Конфигурация (.env)
 
-В корне репозитория находится файл `.env.example` — шаблон переменных окружения для всех сервисов.
+В корне репозитория находится файл `.env.example` — шаблон переменных окружения для всех сервисов.<br>
 Скопируйте его в `.env` и заполните нужными значениями:
 
 ```bash
@@ -40,23 +40,30 @@ cp .env.example .env
 | `AUTH_DB_NAME`          | Имя базы данных                               | `minigram_auth`    |
 | `AUTH_DB_USER`          | Пользователь БД                               | `minigram`         |
 | `AUTH_DB_PASSWORD`      | Пароль БД                                     | `minigram`         |
-| `AUTH_DB_PORT`          | Порт PostgreSQL                               | `5433`             |
-| `AUTH_SERVICE_PORT`     | Порт сервиса                                  | `5000`             |
+| `AUTH_DB_PORT`          | Порт PostgreSQL                               | `5432`             |
 | **Chats service**       |                                               |                    |
 | `CHATS_DB_NAME`         | Имя базы данных                               | `minigram_chats`   |
 | `CHATS_DB_USER`         | Пользователь БД                               | `minigram`         |
 | `CHATS_DB_PASSWORD`     | Пароль БД                                     | `minigram`         |
-| `CHATS_DB_PORT`         | Порт PostgreSQL                               | `5432`             |
+| `CHATS_DB_PORT`         | Порт PostgreSQL                               | `5434`             |
 | `CHATS_SPRING_PROFILES` | Активный Spring-профиль                       | `pg`               |
-| `CHATS_SERVICE_PORT`    | Порт сервиса                                  | `8080`             |
-| **Frontend service**    |                                               |                    |
-| `FRONTEND_SERVICE_PORT` | Порт сервиса                                  | `8081`             |
 | **Profile service**     |                                               |                    |
 | `PROFILE_DB_NAME`       | Имя базы данных                               | `minigram_profile` |
 | `PROFILE_DB_USER`       | Пользователь БД                               | `minigram`         |
 | `PROFILE_DB_PASSWORD`   | Пароль БД                                     | `minigram`         |
-| `PROFILE_DB_PORT`       | Порт PostgreSQL                               | `5434`             |
-| `PROFILE_SERVICE_PORT`  | Порт сервиса                                  | `5001`             |
+| `PROFILE_DB_PORT`       | Порт PostgreSQL                               | `5433`             |
+
+### Конфигурация Caddy (reverse proxy)
+
+В директории `config/` находится файл `Caddyfile.example` — шаблон конфигурации reverse proxy.<br>
+Скопируйте его в `Caddyfile` и при необходимости измените:
+
+```bash
+cp config/Caddyfile.example config/Caddyfile
+```
+
+- `localhost` — dev-режим (HTTP only, порт 80)
+- Замените на доменное имя (например, `minigram.example.com`) для автоматического HTTPS через Let's Encrypt
 
 ### Быстрый старт
 

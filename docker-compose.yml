@@ -1,6 +1,28 @@
 name: minigram
 
 services:
+  # -------------- REVERSE PROXY --------------------------------------------------------------------------------------
+
+  caddy:
+    image: caddy:2.11.2
+    container_name: minigram-caddy
+    depends_on:
+      - auth-service
+      - chats-service
+      - frontend-service
+      - profile-service
+    environment:
+      CADDY_HOST: ${CADDY_HOST:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    networks:
+      - minigram
+    restart: unless-stopped
+
   # -------------- APPLICATION SERVICES --------------------------------------------------------------------------------
 
   auth-service:
@@ -19,8 +41,6 @@ services:
       - JWT__Issuer=${JWT_ISSUER:-Minigram}
       - JWT__Audience=${JWT_AUDIENCE:-MinigramClient}
       - JWT__ExpirationMinutes=${JWT_EXPIRATION:-15}
-    ports:
-      - "${AUTH_SERVICE_PORT:-5001}:5000"
     networks:
       - minigram
     restart: unless-stopped
@@ -42,8 +62,6 @@ services:
       DB_USERNAME: ${CHATS_DB_USER:-minigram}
       DB_PASSWORD: ${CHATS_DB_PASSWORD:-minigram}
       SPRING_PROFILES_ACTIVE: ${CHATS_SPRING_PROFILES:-pg}
-    ports:
-      - "${CHATS_SERVICE_PORT:-5003}:8080"
     networks:
       - minigram
     restart: unless-stopped
@@ -51,8 +69,6 @@ services:
   frontend-service:
     build: ./sources/frontend-service
     container_name: minigram-frontend-service
-    ports:
-      - "${FRONTEND_SERVICE_PORT:-8080}:8080"
     networks:
       - minigram
     restart: unless-stopped
@@ -72,8 +88,6 @@ services:
       - JWT__Secret=${JWT_SECRET}
       - JWT__Issuer=${JWT_ISSUER:-Minigram}
       - JWT__Audience=${JWT_AUDIENCE:-MinigramClient}
-    ports:
-      - "${PROFILE_SERVICE_PORT:-5002}:5000"
     networks:
       - minigram
     restart: unless-stopped
@@ -187,6 +201,7 @@ services:
     restart: no
 
 volumes:
+  caddy_data:
   postgres_auth_data:
   postgres_chats_data:
   postgres_profile_data:
