@@ -18,6 +18,42 @@ services/         — символьные ссылки на отдельные 
   profile-service/ -> sources/minigram/backend/Minigram/Minigram.Profile
 ```
 
+## Конфигурация (.env)
+
+В корне репозитория находится файл `.env.example` — шаблон переменных окружения для всех сервисов.
+Скопируйте его в `.env` и заполните нужными значениями:
+
+```bash
+cp .env.example .env
+```
+
+| Переменная              | Описание                                      | По умолчанию       |
+|-------------------------|-----------------------------------------------|--------------------|
+| **JWT**                 |                                               |                    |
+| `JWT_SECRET`            | Секрет для подписи JWT-токенов (≥ 32 символа) | —                  |
+| `JWT_ISSUER`            | Издатель токена                               | `Minigram`         |
+| `JWT_AUDIENCE`          | Аудитория токена                              | `MinigramClient`   |
+| `JWT_EXPIRATION`        | Время жизни токена (минуты)                   | `15`               |
+| **Auth service**        |                                               |                    |
+| `AUTH_DB_NAME`          | Имя базы данных                               | `minigram_auth`    |
+| `AUTH_DB_USER`          | Пользователь БД                               | `minigram`         |
+| `AUTH_DB_PASSWORD`      | Пароль БД                                     | `minigram`         |
+| `AUTH_DB_PORT`          | Порт PostgreSQL                               | `5433`             |
+| `AUTH_SERVICE_PORT`     | Порт сервиса                                  | `5000`             |
+| **Chats service**       |                                               |                    |
+| `CHATS_DB_NAME`         | Имя базы данных                               | `minigram_chats`   |
+| `CHATS_DB_USER`         | Пользователь БД                               | `minigram`         |
+| `CHATS_DB_PASSWORD`     | Пароль БД                                     | `minigram`         |
+| `CHATS_DB_PORT`         | Порт PostgreSQL                               | `5432`             |
+| `CHATS_SPRING_PROFILES` | Активный Spring-профиль                       | `pg`               |
+| `CHATS_SERVICE_PORT`    | Порт сервиса                                  | `8080`             |
+| **Profile service**     |                                               |                    |
+| `PROFILE_DB_NAME`       | Имя базы данных                               | `minigram_profile` |
+| `PROFILE_DB_USER`       | Пользователь БД                               | `minigram`         |
+| `PROFILE_DB_PASSWORD`   | Пароль БД                                     | `minigram`         |
+| `PROFILE_DB_PORT`       | Порт PostgreSQL                               | `5434`             |
+| `PROFILE_SERVICE_PORT`  | Порт сервиса                                  | `5001`             |
+
 ## Быстрый старт
 
 ```bash
