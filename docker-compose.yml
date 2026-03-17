@@ -1,0 +1,188 @@
+version: '3.8'
+
+name: minigram
+
+services:
+  # -------------- APPLICATION SERVICES --------------------------------------------------------------------------------
+
+  auth-service:
+    build:
+      context: ./sources/minigram/backend/Minigram
+      dockerfile: ./Minigram.Auth/Dockerfile
+    container_name: minigram-auth-service
+    depends_on:
+      liquibase-auth:
+        condition: service_completed_successfully
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Host=postgres-auth;Database=${AUTH_DB_NAME:-minigram_auth};Username=${AUTH_DB_USER:-minigram};Password=${AUTH_DB_PASSWORD:-minigram}
+      - JWT__Secret=${JWT_SECRET}
+      - JWT__Issuer=${JWT_ISSUER:-Minigram}
+      - JWT__Audience=${JWT_AUDIENCE:-MinigramClient}
+      - JWT__ExpirationMinutes=${JWT_EXPIRATION:-15}
+    ports:
+      - "${AUTH_SERVICE_PORT:-5000}:5000"
+    networks:
+      - minigram
+    restart: unless-stopped
+
+  chats-service:
+    build: ./sources/chats-service
+    container_name: minigram-chats-service
+    depends_on:
+      postgres-chats:
+        condition: service_healthy
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER:-Minigram}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-MinigramClient}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-15}
+      DB_HOST: postgres-chats
+      DB_PORT: 5432
+      DB_NAME: ${CHATS_DB_NAME:-minigram_chats}
+      DB_USERNAME: ${CHATS_DB_USER:-minigram}
+      DB_PASSWORD: ${CHATS_DB_PASSWORD:-minigram}
+      SPRING_PROFILES_ACTIVE: ${CHATS_SPRING_PROFILES:-pg}
+    ports:
+      - "${CHATS_SERVICE_PORT:-8080}:8080"
+    networks:
+      - minigram
+    restart: unless-stopped
+
+  profile-service:
+    build:
+      context: ./sources/minigram/backend/Minigram
+      dockerfile: ./Minigram.Profile/Dockerfile
+    container_name: minigram-profile-service
+    depends_on:
+      liquibase-profile:
+        condition: service_completed_successfully
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Host=postgres-profile;Database=${PROFILE_DB_NAME:-minigram_profile};Username=${PROFILE_DB_USER:-minigram};Password=${PROFILE_DB_PASSWORD:-minigram}
+      - JWT__Secret=${JWT_SECRET}
+      - JWT__Issuer=${JWT_ISSUER:-Minigram}
+      - JWT__Audience=${JWT_AUDIENCE:-MinigramClient}
+    ports:
+      - "${PROFILE_SERVICE_PORT:-5001}:5000"
+    networks:
+      - minigram
+    restart: unless-stopped
+
+  # -------------- POSTGRES DATABASES ----------------------------------------------------------------------------------
+
+  postgres-auth:
+    image: postgres:18.3
+    container_name: minigram-postgres-auth
+    environment:
+      POSTGRES_DB: ${AUTH_DB_NAME:-minigram_auth}
+      POSTGRES_USER: ${AUTH_DB_USER:-minigram}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD:-minigram}
+    ports:
+      - "${AUTH_DB_PORT:-5433}:5432"
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql
+    networks:
+      - minigram
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AUTH_DB_USER:-minigram} -d ${AUTH_DB_NAME:-minigram_auth}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  postgres-chats:
+    image: postgres:18.3
+    container_name: minigram-postgres-chats
+    environment:
+      POSTGRES_DB: ${CHATS_DB_NAME:-minigram_chats}
+      POSTGRES_USER: ${CHATS_DB_USER:-minigram}
+      POSTGRES_PASSWORD: ${CHATS_DB_PASSWORD:-minigram}
+    ports:
+      - "${CHATS_DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_chats_data:/var/lib/postgresql
+    networks:
+      - minigram
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${CHATS_DB_USER:-minigram} -d ${CHATS_DB_NAME:-minigram_chats}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  postgres-profile:
+    image: postgres:18.3
+    container_name: minigram-postgres-profile
+    environment:
+      POSTGRES_DB: ${PROFILE_DB_NAME:-minigram_profile}
+      POSTGRES_USER: ${PROFILE_DB_USER:-minigram}
+      POSTGRES_PASSWORD: ${PROFILE_DB_PASSWORD:-minigram}
+    ports:
+      - "${PROFILE_DB_PORT:-5434}:5432"
+    volumes:
+      - postgres_profile_data:/var/lib/postgresql
+    networks:
+      - minigram
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PROFILE_DB_USER:-minigram} -d ${PROFILE_DB_NAME:-minigram_profile}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # -------------- LIQUIBASE MIGRATIONS --------------------------------------------------------------------------------
+
+  liquibase-auth:
+    image: liquibase/liquibase:5.0.1
+    container_name: minigram-liquibase-auth
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+    environment:
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://postgres-auth:5432/${AUTH_DB_NAME:-minigram_auth}
+      LIQUIBASE_COMMAND_USERNAME: ${AUTH_DB_USER:-minigram}
+      LIQUIBASE_COMMAND_PASSWORD: ${AUTH_DB_PASSWORD:-minigram}
+      LIQUIBASE_COMMAND_CHANGELOG_FILE: /changelog-auth/changelog-auth.xml
+    volumes:
+      - ./sources/minigram/backend/sql/changelog-auth.xml:/liquibase/changelog-auth/changelog-auth.xml
+      - ./sources/minigram/backend/sql/migrate/auth:/liquibase/changelog-auth/migrate/auth
+      - ./sources/minigram/docker/drivers:/liquibase/lib
+    networks:
+      - minigram
+    command:
+      - --driver=org.postgresql.Driver
+      - update
+    restart: no
+
+  liquibase-profile:
+    image: liquibase/liquibase:5.0.1
+    container_name: minigram-liquibase-profile
+    depends_on:
+      postgres-profile:
+        condition: service_healthy
+    environment:
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://postgres-profile:5432/${PROFILE_DB_NAME:-minigram_profile}
+      LIQUIBASE_COMMAND_USERNAME: ${PROFILE_DB_USER:-minigram}
+      LIQUIBASE_COMMAND_PASSWORD: ${PROFILE_DB_PASSWORD:-minigram}
+      LIQUIBASE_COMMAND_CHANGELOG_FILE: /changelog-profile/changelog-profile.xml
+    volumes:
+      - ./sources/minigram/backend/sql/changelog-profile.xml:/liquibase/changelog-profile/changelog-profile.xml
+      - ./sources/minigram/backend/sql/migrate/profile:/liquibase/changelog-profile/migrate/profile
+      - ./sources/minigram/docker/drivers:/liquibase/lib
+    networks:
+      - minigram
+    command:
+      - --driver=org.postgresql.Driver
+      - update
+    restart: no
+
+volumes:
+  postgres_auth_data:
+  postgres_chats_data:
+  postgres_profile_data:
+
+networks:
+  minigram:
