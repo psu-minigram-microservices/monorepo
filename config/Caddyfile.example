@@ -36,6 +36,11 @@ http://localhost {
 		reverse_proxy chats-service:8080
 	}
 
+	@ws path /ws /ws/*
+	handle @ws {
+		reverse_proxy chats-service:8080
+	}
+
 	@profiles path /api/v1/profiles /api/v1/profiles/*
 	handle @profiles {
 		reverse_proxy profile-service:5000
