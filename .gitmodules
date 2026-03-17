@@ -3,6 +3,11 @@
 	url = https://github.com/psu-minigram-microservices/chats-service.git
 	branch = main
 
+[submodule "sources/frontend-service"]
+	path = sources/frontend-service
+	url = https://github.com/psu-minigram-microservices/frontend-service.git
+    branch = main
+
 [submodule "sources/profiles-service"]
 	path = sources/profiles-service
 	url = https://github.com/psu-minigram-microservices/profiles-service.git

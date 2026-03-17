@@ -9,6 +9,7 @@ if not exist "services" mkdir services
 
 call :link "auth-service"    "sources\profiles-service\backend\Minigram\Minigram.Auth"
 call :link "chats-service"   "sources\chats-service"
+call :link "frontend-service" "sources\frontend-service"
 call :link "profile-service" "sources\profiles-service\backend\Minigram\Minigram.Profile"
 
 echo Done!
