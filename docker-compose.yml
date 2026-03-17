@@ -7,7 +7,7 @@ services:
 
   auth-service:
     build:
-      context: ./sources/minigram/backend/Minigram
+      context: ./sources/profiles-service/backend/Minigram
       dockerfile: ./Minigram.Auth/Dockerfile
     container_name: minigram-auth-service
     depends_on:
@@ -52,7 +52,7 @@ services:
 
   profile-service:
     build:
-      context: ./sources/minigram/backend/Minigram
+      context: ./sources/profiles-service/backend/Minigram
       dockerfile: ./Minigram.Profile/Dockerfile
     container_name: minigram-profile-service
     depends_on:
@@ -147,9 +147,9 @@ services:
       LIQUIBASE_COMMAND_PASSWORD: ${AUTH_DB_PASSWORD:-minigram}
       LIQUIBASE_COMMAND_CHANGELOG_FILE: /changelog-auth/changelog-auth.xml
     volumes:
-      - ./sources/minigram/backend/sql/changelog-auth.xml:/liquibase/changelog-auth/changelog-auth.xml
-      - ./sources/minigram/backend/sql/migrate/auth:/liquibase/changelog-auth/migrate/auth
-      - ./sources/minigram/docker/drivers:/liquibase/lib
+      - ./sources/profiles-service/backend/sql/changelog-auth.xml:/liquibase/changelog-auth/changelog-auth.xml
+      - ./sources/profiles-service/backend/sql/migrate/auth:/liquibase/changelog-auth/migrate/auth
+      - ./sources/profiles-service/docker/drivers:/liquibase/lib
     networks:
       - minigram
     command:
@@ -169,9 +169,9 @@ services:
       LIQUIBASE_COMMAND_PASSWORD: ${PROFILE_DB_PASSWORD:-minigram}
       LIQUIBASE_COMMAND_CHANGELOG_FILE: /changelog-profile/changelog-profile.xml
     volumes:
-      - ./sources/minigram/backend/sql/changelog-profile.xml:/liquibase/changelog-profile/changelog-profile.xml
-      - ./sources/minigram/backend/sql/migrate/profile:/liquibase/changelog-profile/migrate/profile
-      - ./sources/minigram/docker/drivers:/liquibase/lib
+      - ./sources/profiles-service/backend/sql/changelog-profile.xml:/liquibase/changelog-profile/changelog-profile.xml
+      - ./sources/profiles-service/backend/sql/migrate/profile:/liquibase/changelog-profile/migrate/profile
+      - ./sources/profiles-service/docker/drivers:/liquibase/lib
     networks:
       - minigram
     command:

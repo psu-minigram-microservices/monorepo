@@ -28,8 +28,8 @@ link() {
 }
 
 echo "Linking services..."
+link "auth-service"    "sources/profiles-service/backend/Minigram/Minigram.Auth"
 link "chats-service"   "sources/chats-service"
-link "auth-service"    "sources/minigram/backend/Minigram/Minigram.Auth"
-link "profile-service" "sources/minigram/backend/Minigram/Minigram.Profile"
+link "profile-service" "sources/profiles-service/backend/Minigram/Minigram.Profile"
 
 echo "Done!"

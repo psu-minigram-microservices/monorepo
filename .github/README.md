@@ -10,12 +10,12 @@
 ```
 sources/          — git submodules (исходные репозитории)
   chats-service/      github.com/psu-minigram-microservices/chats-service
-  minigram/           github.com/aarusanov/minigram (auth + profile)
+  profiles-service/   github.com/psu-minigram-microservices/profiles-service (auth + profile)
 
 services/         — символьные ссылки на отдельные сервисы
+  auth-service/    -> sources/profiles-service/backend/Minigram/Minigram.Auth
   chats-service/   -> sources/chats-service
-  auth-service/    -> sources/minigram/backend/Minigram/Minigram.Auth
-  profile-service/ -> sources/minigram/backend/Minigram/Minigram.Profile
+  profile-service/ -> sources/profiles-service/backend/Minigram/Minigram.Profile
 ```
 
 ## Конфигурация (.env)
@@ -84,8 +84,8 @@ git submodule update --remote
 
 ## Сервисы
 
-| Сервис          | Описание              | Источник                                                                                                |
-|-----------------|-----------------------|---------------------------------------------------------------------------------------------------------|
-| auth-service    | Сервис аутентификации | [aarusanov/minigram](https://github.com/aarusanov/minigram) (`backend/Minigram/Minigram.Auth`)          |
-| chats-service   | Сервис чатов          | [psu-minigram-microservices/chats-service](https://github.com/psu-minigram-microservices/chats-service) |
-| profile-service | Сервис профилей       | [aarusanov/minigram](https://github.com/aarusanov/minigram) (`backend/Minigram/Minigram.Profile`)       |
+| Сервис          | Описание              | Источник                                                                                                                                            |
+|-----------------|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| auth-service    | Сервис аутентификации | [psu-minigram-microservices/profiles-service](https://github.com/psu-minigram-microservices/profiles-service) (`backend/Minigram/Minigram.Auth`)    |
+| chats-service   | Сервис чатов          | [psu-minigram-microservices/chats-service](https://github.com/psu-minigram-microservices/chats-service)                                             |
+| profile-service | Сервис профилей       | [psu-minigram-microservices/profiles-service](https://github.com/psu-minigram-microservices/profiles-service) (`backend/Minigram/Minigram.Profile`) |

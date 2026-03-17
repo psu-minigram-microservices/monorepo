@@ -7,9 +7,9 @@ git submodule update --init --recursive
 echo Creating services directory...
 if not exist "services" mkdir services
 
+call :link "auth-service"    "sources\profiles-service\backend\Minigram\Minigram.Auth"
 call :link "chats-service"   "sources\chats-service"
-call :link "auth-service"    "sources\minigram\backend\Minigram\Minigram.Auth"
-call :link "profile-service" "sources\minigram\backend\Minigram\Minigram.Profile"
+call :link "profile-service" "sources\profiles-service\backend\Minigram\Minigram.Profile"
 
 echo Done!
 exit /b 0

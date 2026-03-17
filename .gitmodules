@@ -1,9 +1,9 @@
-[submodule "sources/minigram"]
-	path = sources/minigram
-	url = https://github.com/aarusanov/minigram
-	branch = main
-
 [submodule "sources/chats-service"]
 	path = sources/chats-service
-	url = https://github.com/psu-minigram-microservices/chats-service
+	url = https://github.com/psu-minigram-microservices/chats-service.git
+	branch = main
+
+[submodule "sources/profiles-service"]
+	path = sources/profiles-service
+	url = https://github.com/psu-minigram-microservices/profiles-service.git
 	branch = main
