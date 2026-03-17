@@ -20,7 +20,7 @@ services:
       - JWT__Audience=${JWT_AUDIENCE:-MinigramClient}
       - JWT__ExpirationMinutes=${JWT_EXPIRATION:-15}
     ports:
-      - "${AUTH_SERVICE_PORT:-5000}:5000"
+      - "${AUTH_SERVICE_PORT:-5001}:5000"
     networks:
       - minigram
     restart: unless-stopped
@@ -43,7 +43,16 @@ services:
       DB_PASSWORD: ${CHATS_DB_PASSWORD:-minigram}
       SPRING_PROFILES_ACTIVE: ${CHATS_SPRING_PROFILES:-pg}
     ports:
-      - "${CHATS_SERVICE_PORT:-8080}:8080"
+      - "${CHATS_SERVICE_PORT:-5003}:8080"
+    networks:
+      - minigram
+    restart: unless-stopped
+
+  frontend-service:
+    build: ./sources/frontend-service
+    container_name: minigram-frontend-service
+    ports:
+      - "${FRONTEND_SERVICE_PORT:-8080}:8080"
     networks:
       - minigram
     restart: unless-stopped
@@ -64,7 +73,7 @@ services:
       - JWT__Issuer=${JWT_ISSUER:-Minigram}
       - JWT__Audience=${JWT_AUDIENCE:-MinigramClient}
     ports:
-      - "${PROFILE_SERVICE_PORT:-5001}:5000"
+      - "${PROFILE_SERVICE_PORT:-5002}:5000"
     networks:
       - minigram
     restart: unless-stopped
@@ -79,7 +88,7 @@ services:
       POSTGRES_USER: ${AUTH_DB_USER:-minigram}
       POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD:-minigram}
     ports:
-      - "${AUTH_DB_PORT:-5433}:5432"
+      - "${AUTH_DB_PORT:-5432}:5432"
     volumes:
       - postgres_auth_data:/var/lib/postgresql
     networks:
@@ -99,7 +108,7 @@ services:
       POSTGRES_USER: ${CHATS_DB_USER:-minigram}
       POSTGRES_PASSWORD: ${CHATS_DB_PASSWORD:-minigram}
     ports:
-      - "${CHATS_DB_PORT:-5432}:5432"
+      - "${CHATS_DB_PORT:-5434}:5432"
     volumes:
       - postgres_chats_data:/var/lib/postgresql
     networks:
@@ -119,7 +128,7 @@ services:
       POSTGRES_USER: ${PROFILE_DB_USER:-minigram}
       POSTGRES_PASSWORD: ${PROFILE_DB_PASSWORD:-minigram}
     ports:
-      - "${PROFILE_DB_PORT:-5434}:5432"
+      - "${PROFILE_DB_PORT:-5433}:5432"
     volumes:
       - postgres_profile_data:/var/lib/postgresql
     networks:

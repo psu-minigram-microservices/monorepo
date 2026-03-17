@@ -5,20 +5,22 @@
  </div>
 </div>
 
-## Структура
+### Структура
 
 ```
 sources/          — git submodules (исходные репозитории)
   chats-service/      github.com/psu-minigram-microservices/chats-service
+  frontend-service/   github.com/psu-minigram-microservices/frontend-service
   profiles-service/   github.com/psu-minigram-microservices/profiles-service (auth + profile)
 
 services/         — символьные ссылки на отдельные сервисы
-  auth-service/    -> sources/profiles-service/backend/Minigram/Minigram.Auth
-  chats-service/   -> sources/chats-service
-  profile-service/ -> sources/profiles-service/backend/Minigram/Minigram.Profile
+  auth-service/      -> sources/profiles-service/backend/Minigram/Minigram.Auth
+  chats-service/     -> sources/chats-service
+  frontend-service/  -> sources/frontend-service
+  profile-service/   -> sources/profiles-service/backend/Minigram/Minigram.Profile
 ```
 
-## Конфигурация (.env)
+### Конфигурация (.env)
 
 В корне репозитория находится файл `.env.example` — шаблон переменных окружения для всех сервисов.
 Скопируйте его в `.env` и заполните нужными значениями:
@@ -47,6 +49,8 @@ cp .env.example .env
 | `CHATS_DB_PORT`         | Порт PostgreSQL                               | `5432`             |
 | `CHATS_SPRING_PROFILES` | Активный Spring-профиль                       | `pg`               |
 | `CHATS_SERVICE_PORT`    | Порт сервиса                                  | `8080`             |
+| **Frontend service**    |                                               |                    |
+| `FRONTEND_SERVICE_PORT` | Порт сервиса                                  | `8081`             |
 | **Profile service**     |                                               |                    |
 | `PROFILE_DB_NAME`       | Имя базы данных                               | `minigram_profile` |
 | `PROFILE_DB_USER`       | Пользователь БД                               | `minigram`         |
@@ -54,7 +58,7 @@ cp .env.example .env
 | `PROFILE_DB_PORT`       | Порт PostgreSQL                               | `5434`             |
 | `PROFILE_SERVICE_PORT`  | Порт сервиса                                  | `5001`             |
 
-## Быстрый старт
+### Быстрый старт
 
 ```bash
 git clone --recurse-submodules <repo-url>
@@ -75,17 +79,18 @@ setup.bat
 
 Скрипты инициализируют сабмодули и создадут ссылки на сервисы в директории `services/`.
 
-## Обновление сабмодулей
+### Обновление сабмодулей
 
 ```bash
 # Обновить все сабмодули до последнего коммита в main
 git submodule update --remote
 ```
 
-## Сервисы
+### Сервисы
 
-| Сервис          | Описание              | Источник                                                                                                                                            |
-|-----------------|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| auth-service    | Сервис аутентификации | [psu-minigram-microservices/profiles-service](https://github.com/psu-minigram-microservices/profiles-service) (`backend/Minigram/Minigram.Auth`)    |
-| chats-service   | Сервис чатов          | [psu-minigram-microservices/chats-service](https://github.com/psu-minigram-microservices/chats-service)                                             |
-| profile-service | Сервис профилей       | [psu-minigram-microservices/profiles-service](https://github.com/psu-minigram-microservices/profiles-service) (`backend/Minigram/Minigram.Profile`) |
+| Сервис           | Описание              | Источник                                                                                                                 |
+|------------------|-----------------------|--------------------------------------------------------------------------------------------------------------------------|
+| auth-service     | Сервис аутентификации | [profiles-service](https://github.com/psu-minigram-microservices/profiles-service) (`backend/Minigram/Minigram.Auth`)    |
+| chats-service    | Сервис чатов          | [chats-service](https://github.com/psu-minigram-microservices/chats-service)                                             |
+| frontend-service | Сервис фронтенда      | [frontend-service](https://github.com/psu-minigram-microservices/frontend-service)                                       |
+| profile-service  | Сервис профилей       | [profiles-service](https://github.com/psu-minigram-microservices/profiles-service) (`backend/Minigram/Minigram.Profile`) |
