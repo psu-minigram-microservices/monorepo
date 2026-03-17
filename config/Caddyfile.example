@@ -13,7 +13,17 @@ http://localhost {
 		X-Frame-Options "DENY"
 		X-XSS-Protection "1; mode=block"
 		Referrer-Policy "strict-origin-when-cross-origin"
+		Access-Control-Allow-Origin "{http.request.header.Origin}"
+		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+		Access-Control-Allow-Headers "Content-Type, Authorization"
+		Access-Control-Allow-Credentials "true"
+		Access-Control-Max-Age "3600"
 		-Server
+	}
+
+	@options method OPTIONS
+	handle @options {
+		respond 204
 	}
 
 	@auth path /api/v1/auth /api/v1/auth/*
