@@ -7,8 +7,13 @@
 	path = sources/frontend-service
 	url = https://github.com/psu-minigram-microservices/frontend-service.git
     branch = main
-
 [submodule "sources/profiles-service"]
 	path = sources/profiles-service
 	url = https://github.com/psu-minigram-microservices/profiles-service.git
 	branch = main
+
+[submodule "sources/auth-service"]
+	path = sources/auth-service
+	url = https://github.com/psu-minigram-microservices/auth-service.git
+	branch = main
+
