@@ -26,7 +26,9 @@ services:
   # -------------- APPLICATION SERVICES --------------------------------------------------------------------------------
 
   auth-service:
-    build: ./sources/auth-service
+    build:
+      context: ./sources/auth-service/backend/Minigram
+      dockerfile: ./Minigram.Auth/Dockerfile
     container_name: minigram-auth-service
     depends_on:
       liquibase-auth:
