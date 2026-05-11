@@ -56,11 +56,11 @@ services:
       JWT_ISSUER: ${JWT_ISSUER:-Minigram}
       JWT_AUDIENCE: ${JWT_AUDIENCE:-MinigramClient}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-15}
-      DB_HOST: postgres-chats
-      DB_PORT: 5432
-      DB_NAME: ${CHATS_DB_NAME:-minigram_chats}
-      DB_USERNAME: ${CHATS_DB_USER:-minigram}
-      DB_PASSWORD: ${CHATS_DB_PASSWORD:-minigram}
+      CHATS_DB_HOST: postgres-chats
+      CHATS_DB_PORT: 5432
+      CHATS_DB_NAME: ${CHATS_DB_NAME:-minigram_chats}
+      CHATS_DB_USERNAME: ${CHATS_DB_USER:-minigram}
+      CHATS_DB_PASSWORD: ${CHATS_DB_PASSWORD:-minigram}
     networks:
       - minigram
     restart: unless-stopped
