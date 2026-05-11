@@ -27,7 +27,7 @@ services:
 
   auth-service:
     build:
-      context: ./sources/auth-service/backend/Minigram
+      context: ./services/auth-service/backend/Minigram
       dockerfile: ./Minigram.Auth/Dockerfile
     container_name: minigram-auth-service
     depends_on:
@@ -46,7 +46,7 @@ services:
     restart: unless-stopped
 
   chats-service:
-    build: ./sources/chats-service
+    build: ./services/chats-service
     container_name: minigram-chats-service
     depends_on:
       postgres-chats:
@@ -61,13 +61,12 @@ services:
       DB_NAME: ${CHATS_DB_NAME:-minigram_chats}
       DB_USERNAME: ${CHATS_DB_USER:-minigram}
       DB_PASSWORD: ${CHATS_DB_PASSWORD:-minigram}
-      SPRING_PROFILES_ACTIVE: ${CHATS_SPRING_PROFILES:-pg}
     networks:
       - minigram
     restart: unless-stopped
 
   frontend-service:
-    build: ./sources/frontend-service
+    build: ./services/frontend-service
     container_name: minigram-frontend-service
     networks:
       - minigram
@@ -75,7 +74,7 @@ services:
 
   profile-service:
     build:
-      context: ./sources/profiles-service/backend/Minigram
+      context: ./services/profile-service/backend/Minigram
       dockerfile: ./Minigram.Profile/Dockerfile
     container_name: minigram-profile-service
     depends_on:
@@ -168,9 +167,9 @@ services:
       LIQUIBASE_COMMAND_PASSWORD: ${AUTH_DB_PASSWORD:-minigram}
       LIQUIBASE_COMMAND_CHANGELOG_FILE: /changelog-auth/changelog-auth.xml
     volumes:
-      - ./sources/auth-service/backend/sql/changelog-auth.xml:/liquibase/changelog-auth/changelog-auth.xml
-      - ./sources/auth-service/backend/sql/migrate/auth:/liquibase/changelog-auth/migrate/auth
-      - ./sources/auth-service/docker/drivers:/liquibase/lib
+      - ./services/auth-service/backend/sql/changelog-auth.xml:/liquibase/changelog-auth/changelog-auth.xml
+      - ./services/auth-service/backend/sql/migrate/auth:/liquibase/changelog-auth/migrate/auth
+      - ./services/auth-service/docker/drivers:/liquibase/lib
     networks:
       - minigram
     command:
@@ -190,9 +189,9 @@ services:
       LIQUIBASE_COMMAND_PASSWORD: ${PROFILE_DB_PASSWORD:-minigram}
       LIQUIBASE_COMMAND_CHANGELOG_FILE: /changelog-profile/changelog-profile.xml
     volumes:
-      - ./sources/profiles-service/backend/sql/changelog-profile.xml:/liquibase/changelog-profile/changelog-profile.xml
-      - ./sources/profiles-service/backend/sql/migrate/profile:/liquibase/changelog-profile/migrate/profile
-      - ./sources/profiles-service/docker/drivers:/liquibase/lib
+      - ./services/profile-service/backend/sql/changelog-profile.xml:/liquibase/changelog-profile/changelog-profile.xml
+      - ./services/profile-service/backend/sql/migrate/profile:/liquibase/changelog-profile/migrate/profile
+      - ./services/profile-service/docker/drivers:/liquibase/lib
     networks:
       - minigram
     command:

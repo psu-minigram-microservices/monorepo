@@ -1,19 +1,19 @@
-[submodule "sources/chats-service"]
-	path = sources/chats-service
-	url = https://github.com/psu-minigram-microservices/chats-service.git
-	branch = main
-
-[submodule "sources/frontend-service"]
-	path = sources/frontend-service
-	url = https://github.com/psu-minigram-microservices/frontend-service.git
-    branch = main
-[submodule "sources/profiles-service"]
-	path = sources/profiles-service
-	url = https://github.com/psu-minigram-microservices/profiles-service.git
-	branch = main
-
-[submodule "sources/auth-service"]
-	path = sources/auth-service
+[submodule "services/auth-service"]
+	path = services/auth-service
 	url = https://github.com/psu-minigram-microservices/auth-service.git
 	branch = main
 
+[submodule "services/chats-service"]
+	path = services/chats-service
+	url = https://github.com/psu-minigram-microservices/chats-service.git
+	branch = main
+
+[submodule "services/frontend-service"]
+	path = services/frontend-service
+	url = https://github.com/psu-minigram-microservices/frontend-service.git
+	branch = main
+
+[submodule "services/profile-service"]
+	path = services/profile-service
+	url = https://github.com/psu-minigram-microservices/profiles-service.git
+	branch = main

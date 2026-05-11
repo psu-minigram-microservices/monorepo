@@ -5,20 +5,14 @@
  </div>
 </div>
 
-### Структура
+### Сервисы
 
-```
-sources/          — git submodules (исходные репозитории)
-  chats-service/      github.com/psu-minigram-microservices/chats-service
-  frontend-service/   github.com/psu-minigram-microservices/frontend-service
-  profiles-service/   github.com/psu-minigram-microservices/profiles-service (auth + profile)
-
-services/         — символьные ссылки на отдельные сервисы
-  auth-service/      -> sources/profiles-service/backend/Minigram/Minigram.Auth
-  chats-service/     -> sources/chats-service
-  frontend-service/  -> sources/frontend-service
-  profile-service/   -> sources/profiles-service/backend/Minigram/Minigram.Profile
-```
+| Сервис           | Описание              | Источник                                                                                       |
+|------------------|-----------------------|------------------------------------------------------------------------------------------------|
+| auth-service     | Сервис аутентификации | [auth-service](https://github.com/psu-minigram-microservices/auth-service)                     |
+| chats-service    | Сервис чатов          | [chats-service](https://github.com/psu-minigram-microservices/chats-service)                   |
+| frontend-service | Сервис фронтенда      | [frontend-service](https://github.com/psu-minigram-microservices/frontend-service)             |
+| profile-service  | Сервис профилей       | [profiles-service](https://github.com/psu-minigram-microservices/profiles-service)             |
 
 ### Конфигурация (.env)
 
@@ -46,7 +40,6 @@ cp .env.example .env
 | `CHATS_DB_USER`         | Пользователь БД                               | `minigram`         |
 | `CHATS_DB_PASSWORD`     | Пароль БД                                     | `minigram`         |
 | `CHATS_DB_PORT`         | Порт PostgreSQL                               | `5434`             |
-| `CHATS_SPRING_PROFILES` | Активный Spring-профиль                       | `pg`               |
 | **Profile service**     |                                               |                    |
 | `PROFILE_DB_NAME`       | Имя базы данных                               | `minigram_profile` |
 | `PROFILE_DB_USER`       | Пользователь БД                               | `minigram`         |
@@ -68,23 +61,17 @@ cp config/Caddyfile.example config/Caddyfile
 ### Быстрый старт
 
 ```bash
-git clone --recurse-submodules <repo-url>
+git clone --recurse-submodules https://github.com/psu-minigram-microservices/monorepo
 cd monorepo
+docker compose up --build
 ```
 
-Если репозиторий уже склонирован без `--recurse-submodules`, скрипты ниже сами подтянут сабмодули.
+Если репозиторий уже склонирован без `--recurse-submodules`:
 
-**Linux / macOS:**
 ```bash
-sh setup.sh
+git submodule update --init --recursive
+docker compose up --build
 ```
-
-**Windows:**
-```bat
-setup.bat
-```
-
-Скрипты инициализируют сабмодули и создадут ссылки на сервисы в директории `services/`.
 
 ### Обновление сабмодулей
 
@@ -92,12 +79,3 @@ setup.bat
 # Обновить все сабмодули до последнего коммита в main
 git submodule update --remote
 ```
-
-### Сервисы
-
-| Сервис           | Описание              | Источник                                                                                                                 |
-|------------------|-----------------------|--------------------------------------------------------------------------------------------------------------------------|
-| auth-service     | Сервис аутентификации | [profiles-service](https://github.com/psu-minigram-microservices/profiles-service) (`backend/Minigram/Minigram.Auth`)    |
-| chats-service    | Сервис чатов          | [chats-service](https://github.com/psu-minigram-microservices/chats-service)                                             |
-| frontend-service | Сервис фронтенда      | [frontend-service](https://github.com/psu-minigram-microservices/frontend-service)                                       |
-| profile-service  | Сервис профилей       | [profiles-service](https://github.com/psu-minigram-microservices/profiles-service) (`backend/Minigram/Minigram.Profile`) |
