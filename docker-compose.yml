@@ -28,6 +28,8 @@ services:
   auth-service:
     image: ghcr.io/psu-minigram-microservices/auth-service:${AUTH_TAG:-dev}
     container_name: minigram-auth-service
+    ports:
+      - "${AUTH_PORT:-5001}:5000"
     depends_on:
       liquibase-auth:
         condition: service_completed_successfully
@@ -46,10 +48,13 @@ services:
   chats-service:
     image: ghcr.io/psu-minigram-microservices/chats-service:${CHATS_TAG:-dev}
     container_name: minigram-chats-service
+    ports:
+      - "${CHATS_PORT:-8081}:8080"
     depends_on:
       postgres-chats:
         condition: service_healthy
     environment:
+      JAVA_TOOL_OPTIONS: "-Dio.ktor.development=true"
       JWT_SECRET: ${JWT_SECRET}
       JWT_ISSUER: ${JWT_ISSUER:-Minigram}
       JWT_AUDIENCE: ${JWT_AUDIENCE:-MinigramClient}
@@ -73,6 +78,8 @@ services:
   profile-service:
     image: ghcr.io/psu-minigram-microservices/profiles-service:${PROFILE_TAG:-dev}
     container_name: minigram-profile-service
+    ports:
+      - "${PROFILE_PORT:-5002}:5000"
     depends_on:
       liquibase-profile:
         condition: service_completed_successfully
