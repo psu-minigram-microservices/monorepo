@@ -26,7 +26,7 @@ services:
   # -------------- APPLICATION SERVICES --------------------------------------------------------------------------------
 
   auth-service:
-    image: ghcr.io/psu-minigram-microservices/auth-service:${AUTH_TAG:-dev}
+    image: ghcr.io/psu-minigram-microservices/auth-service:${AUTH_TAG:-latest}
     container_name: minigram-auth-service
     ports:
       - "${AUTH_PORT:-5001}:5000"
@@ -46,7 +46,7 @@ services:
     restart: unless-stopped
 
   chats-service:
-    image: ghcr.io/psu-minigram-microservices/chats-service:${CHATS_TAG:-dev}
+    image: ghcr.io/psu-minigram-microservices/chats-service:${CHATS_TAG:-latest}
     container_name: minigram-chats-service
     ports:
       - "${CHATS_PORT:-8081}:8080"
@@ -69,14 +69,14 @@ services:
     restart: unless-stopped
 
   frontend-service:
-    image: ghcr.io/psu-minigram-microservices/frontend-service:${FRONTEND_TAG:-dev}
+    image: ghcr.io/psu-minigram-microservices/frontend-service:${FRONTEND_TAG:-latest}
     container_name: minigram-frontend-service
     networks:
       - minigram
     restart: unless-stopped
 
   profile-service:
-    image: ghcr.io/psu-minigram-microservices/profiles-service:${PROFILE_TAG:-dev}
+    image: ghcr.io/psu-minigram-microservices/profiles-service:${PROFILE_TAG:-latest}
     container_name: minigram-profile-service
     ports:
       - "${PROFILE_PORT:-5002}:5000"
