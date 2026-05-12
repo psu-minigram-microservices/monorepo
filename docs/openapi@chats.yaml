@@ -1,0 +1,720 @@
+openapi: 3.1.1
+info:
+  title: Chats API
+  version: "1.0"
+  description: Manage chats, members and messages
+paths:
+  /api/v1/chats:
+    post:
+      tags:
+      - Chats
+      summary: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateChatRequest"
+      responses:
+        "201":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatDto"
+      security:
+      - jwt: []
+    get:
+      tags:
+      - Chats
+      summary: ""
+      parameters:
+      - name: page
+        in: query
+        schema:
+          type: string
+      - name: size
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - content
+                - page
+                - size
+                - total
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ChatDto"
+                  page:
+                    type: integer
+                  size:
+                    type: integer
+                  total:
+                    type: integer
+      security:
+      - jwt: []
+  /api/v1/chats/{chat_id}:
+    put:
+      tags:
+      - Chats
+      summary: ""
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditChatRequest"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatDto"
+      security:
+      - jwt: []
+    delete:
+      tags:
+      - Chats
+      summary: ""
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: ""
+      security:
+      - jwt: []
+    get:
+      tags:
+      - Chats
+      summary: ""
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatDto"
+      security:
+      - jwt: []
+    patch:
+      tags:
+      - Chats
+      summary: ""
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditChatRequest"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatDto"
+      security:
+      - jwt: []
+  /api/v1/chats/{chat_id}/members:
+    get:
+      tags:
+      - Chat Members
+      summary: ""
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: page
+        in: query
+        schema:
+          type: string
+      - name: size
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - content
+                - page
+                - size
+                - total
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ChatMemberDto"
+                  page:
+                    type: integer
+                  size:
+                    type: integer
+                  total:
+                    type: integer
+      security:
+      - jwt: []
+  /api/v1/chats/{chat_id}/members/me:
+    delete:
+      tags:
+      - Chat Members
+      summary: ""
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: ""
+      security:
+      - jwt: []
+    get:
+      tags:
+      - Chat Members
+      summary: ""
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMemberDto"
+      security:
+      - jwt: []
+  /api/v1/chats/{chat_id}/members/{member_id}:
+    post:
+      tags:
+      - Chat Members
+      summary: ""
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: member_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: ""
+      security:
+      - jwt: []
+    delete:
+      tags:
+      - Chat Members
+      summary: ""
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: member_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: ""
+      security:
+      - jwt: []
+    get:
+      tags:
+      - Chat Members
+      summary: ""
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: member_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMemberDto"
+      security:
+      - jwt: []
+  /api/v1/chats/{chat_id}/messages:
+    post:
+      tags:
+      - Chat Messages
+      summary: ""
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageRequest"
+      responses:
+        "201":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessageDto"
+      security:
+      - jwt: []
+    get:
+      tags:
+      - Chat Messages
+      summary: ""
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: page
+        in: query
+        schema:
+          type: string
+      - name: size
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - content
+                - page
+                - size
+                - total
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ChatMessageDto"
+                  page:
+                    type: integer
+                  size:
+                    type: integer
+                  total:
+                    type: integer
+      security:
+      - jwt: []
+  /api/v1/chats/{chat_id}/messages/{message_id}:
+    put:
+      tags:
+      - Chat Messages
+      summary: ""
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: message_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditMessageRequest"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessageDto"
+      security:
+      - jwt: []
+    delete:
+      tags:
+      - Chat Messages
+      summary: ""
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: message_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: ""
+      security:
+      - jwt: []
+    get:
+      tags:
+      - Chat Messages
+      summary: ""
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: message_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessageDto"
+      security:
+      - jwt: []
+    patch:
+      tags:
+      - Chat Messages
+      summary: ""
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: message_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditMessageRequest"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessageDto"
+      security:
+      - jwt: []
+  /api/v1/keys:
+    put:
+      tags:
+      - E2E Keys
+      summary: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpsertPublicKeyRequest"
+      responses:
+        "200":
+          description: ""
+      security:
+      - jwt: []
+  /api/v1/keys/{user_id}:
+    get:
+      tags:
+      - E2E Keys
+      summary: ""
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPublicKeyDto"
+      security:
+      - jwt: []
+  /api/v1/keys/backup:
+    put:
+      tags:
+      - E2E Keys
+      summary: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KeyBackupRequest"
+      responses:
+        "200":
+          description: ""
+      security:
+      - jwt: []
+    get:
+      tags:
+      - E2E Keys
+      summary: ""
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeyBackupDto"
+      security:
+      - jwt: []
+components:
+  schemas:
+    ChatMemberDto:
+      type: object
+      title: ChatMemberDto
+      required:
+      - profileId
+      - name
+      - role
+      - joinedAt
+      properties:
+        profileId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        photoUrl:
+          type:
+          - string
+          - "null"
+        role:
+          type: string
+          enum:
+          - owner
+          - member
+        joinedAt:
+          type: string
+          format: date-time
+    ChatDto:
+      type: object
+      title: ChatDto
+      required:
+      - id
+      - type
+      - ownerId
+      - members
+      - createdAt
+      - updatedAt
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum:
+          - saved
+          - direct
+          - group
+        title:
+          type:
+          - string
+          - "null"
+        ownerId:
+          type: string
+          format: uuid
+        members:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMemberDto"
+        lastMessageId:
+          type:
+          - integer
+          - "null"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateChatRequest:
+      type: object
+      title: CreateChatRequest
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - saved
+          - direct
+          - group
+        title:
+          type:
+          - string
+          - "null"
+        memberIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+    EditChatRequest:
+      type: object
+      title: EditChatRequest
+      properties:
+        title:
+          type:
+          - string
+          - "null"
+    ChatMessageDto:
+      type: object
+      title: ChatMessageDto
+      required:
+      - id
+      - chat
+      - sender
+      - content
+      - createdAt
+      - updatedAt
+      properties:
+        id:
+          type: integer
+        chat:
+          $ref: "#/components/schemas/ChatDto"
+        sender:
+          $ref: "#/components/schemas/ChatMemberDto"
+        content:
+          type: string
+        encrypted:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    SendMessageRequest:
+      type: object
+      title: SendMessageRequest
+      required:
+      - content
+      properties:
+        content:
+          type: string
+        encrypted:
+          type: boolean
+    EditMessageRequest:
+      type: object
+      title: EditMessageRequest
+      required:
+      - content
+      properties:
+        content:
+          type: string
+    UpsertPublicKeyRequest:
+      type: object
+      title: UpsertPublicKeyRequest
+      required:
+      - publicKey
+      properties:
+        publicKey:
+          type: string
+    UserPublicKeyDto:
+      type: object
+      title: UserPublicKeyDto
+      required:
+      - userId
+      - publicKey
+      properties:
+        userId:
+          type: string
+          format: uuid
+        publicKey:
+          type: string
+    KeyBackupRequest:
+      type: object
+      title: KeyBackupRequest
+      required:
+      - salt
+      - iv
+      - ciphertext
+      properties:
+        salt:
+          type: string
+        iv:
+          type: string
+        ciphertext:
+          type: string
+    KeyBackupDto:
+      type: object
+      title: KeyBackupDto
+      required:
+      - salt
+      - iv
+      - ciphertext
+      properties:
+        salt:
+          type: string
+        iv:
+          type: string
+        ciphertext:
+          type: string
+  securitySchemes:
+    jwt:
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT Bearer Authentication
+      type: http

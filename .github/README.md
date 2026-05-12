@@ -31,6 +31,16 @@ docker compose up -d
 AUTH_TAG=v1.0.0 CHATS_TAG=v2.1.0 FRONTEND_TAG=v1.3.0 PROFILE_TAG=v1.1.0 docker compose up -d
 ```
 
+### OpenAPI
+
+|  Сервис   | Online                                          | Offline                                            |
+|:---------:|:------------------------------------------------|----------------------------------------------------|
+|  `auth`   | [localhost:5001](http://localhost:5001/)        | [openapi@auth.yaml](/docs/openapi@auth.yaml)       |
+|  `chats`  | [localhost:8081](http://localhost:8081/swagger) | [openapi@chats.yaml](/docs/openapi@chats.yaml)     |
+| `profile` | [localhost:5002](http://localhost:5002/)        | [openapi@profile.yaml](/docs/openapi@profile.yaml) |
+
+> База данных чатов доступна напрямую на порту `5434` (по умолчанию) для просмотра зашифрованных сообщений.
+
 ### Конфигурация Caddy (reverse proxy)
 
 В директории `config/` находится файл `Caddyfile.example` — шаблон конфигурации reverse proxy.
