@@ -16,4 +16,4 @@
 [submodule "services/profile-service"]
 	path = services/profile-service
 	url = https://github.com/psu-minigram-microservices/profiles-service.git
-	branch = main
+	branch = rewrite-to-python
