@@ -25,6 +25,11 @@ cp .env.example .env
 
 | Переменная              | Описание                                      | По умолчанию       |
 |-------------------------|-----------------------------------------------|--------------------|
+| **Теги образов**        |                                               |                    |
+| `AUTH_TAG`              | Тег образа auth-service                       | `latest`           |
+| `CHATS_TAG`             | Тег образа chats-service                      | `latest`           |
+| `FRONTEND_TAG`          | Тег образа frontend-service                   | `latest`           |
+| `PROFILE_TAG`           | Тег образа profiles-service                   | `latest`           |
 | **JWT**                 |                                               |                    |
 | `JWT_SECRET`            | Секрет для подписи JWT-токенов (≥ 32 символа) | —                  |
 | `JWT_ISSUER`            | Издатель токена                               | `Minigram`         |
@@ -63,19 +68,13 @@ cp config/Caddyfile.example config/Caddyfile
 ```bash
 git clone --recurse-submodules https://github.com/psu-minigram-microservices/monorepo
 cd monorepo
-docker compose up --build
+cp .env.example .env
+# заполните .env
+docker compose up -d
 ```
 
-Если репозиторий уже склонирован без `--recurse-submodules`:
+Для запуска с конкретными версиями сервисов:
 
 ```bash
-git submodule update --init --recursive
-docker compose up --build
-```
-
-### Обновление сабмодулей
-
-```bash
-# Обновить все сабмодули до последнего коммита в main
-git submodule update --remote
+AUTH_TAG=v1.0.0 CHATS_TAG=v2.1.0 FRONTEND_TAG=v1.3.0 PROFILE_TAG=v1.1.0 docker compose up -d
 ```
