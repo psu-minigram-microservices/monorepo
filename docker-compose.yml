@@ -26,9 +26,7 @@ services:
   # -------------- APPLICATION SERVICES --------------------------------------------------------------------------------
 
   auth-service:
-    build:
-      context: ./services/auth-service/backend/Minigram
-      dockerfile: ./Minigram.Auth/Dockerfile
+    image: ghcr.io/psu-minigram-microservices/auth-service:${AUTH_TAG:-dev}
     container_name: minigram-auth-service
     depends_on:
       liquibase-auth:
@@ -46,7 +44,7 @@ services:
     restart: unless-stopped
 
   chats-service:
-    build: ./services/chats-service
+    image: ghcr.io/psu-minigram-microservices/chats-service:${CHATS_TAG:-dev}
     container_name: minigram-chats-service
     depends_on:
       postgres-chats:
@@ -66,16 +64,14 @@ services:
     restart: unless-stopped
 
   frontend-service:
-    build: ./services/frontend-service
+    image: ghcr.io/psu-minigram-microservices/frontend-service:${FRONTEND_TAG:-dev}
     container_name: minigram-frontend-service
     networks:
       - minigram
     restart: unless-stopped
 
   profile-service:
-    build:
-      context: ./services/profile-service/backend/Minigram
-      dockerfile: ./Minigram.Profile/Dockerfile
+    image: ghcr.io/psu-minigram-microservices/profiles-service:${PROFILE_TAG:-dev}
     container_name: minigram-profile-service
     depends_on:
       liquibase-profile:
