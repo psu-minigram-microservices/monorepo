@@ -2,43 +2,146 @@ openapi: 3.1.1
 info:
   title: Chats API
   version: "1.0"
-  description: Manage chats, members and messages
+  description: |
+    API for managing chats, members, messages and end-to-end encryption keys.
+
+    All endpoints require a JWT Bearer token in the `Authorization` header.
+    Tokens are issued by the auth-service.
+
+servers:
+  - url: http://localhost:8081
+    description: Local development server
+
+tags:
+  - name: Chats
+    description: Create and manage chats (saved, direct, group)
+  - name: Chat Members
+    description: Manage chat membership — invite, kick, and inspect members
+  - name: Chat Messages
+    description: Send, edit, delete, and retrieve messages
+  - name: E2E Keys
+    description: Manage RSA public keys and encrypted private key backups for end-to-end encryption
+  - name: Real-time
+    description: WebSocket connection for real-time chat events
+  - name: System
+    description: Service health and infrastructure endpoints
+
 paths:
+  /health:
+    get:
+      tags:
+      - System
+      summary: Health check
+      description: Returns 200 OK if the service is up.
+      responses:
+        "200":
+          description: Service is healthy
+
+  /ws:
+    get:
+      tags:
+      - Real-time
+      summary: WebSocket connection
+      description: |
+        Establishes a WebSocket connection for real-time chat events.
+
+        Pass the JWT token as a query parameter: `?token=<jwt>`
+
+        Events pushed over the socket:
+        - `message.new` — a new message was sent
+        - `message.edited` — a message was updated
+        - `message.deleted` — a message was deleted
+        - `chat.created` — a new chat was created
+        - `chat.updated` — chat metadata changed
+        - `member.joined` — a user joined a chat
+        - `member.left` — a user left a chat
+      parameters:
+      - name: token
+        in: query
+        description: JWT Bearer token (passed as query parameter for WebSocket upgrade)
+        required: true
+        schema:
+          type: string
+          example: eyJhbGciOiJSUzI1NiJ9...
+      responses:
+        "101":
+          description: Switching Protocols — WebSocket connection established
+        "401":
+          description: Missing or invalid JWT token
+
   /api/v1/chats:
     post:
       tags:
       - Chats
-      summary: ""
+      summary: Create a chat
+      description: |-
+        Creates a new chat of the specified type:
+
+        - `saved` — personal notes chat, no other members needed
+
+        - `direct` — one-on-one chat, provide the other user's profile ID in `memberIds`
+
+        - `group` — group chat, optionally provide initial `memberIds` and a `title`
       requestBody:
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/CreateChatRequest"
+            examples:
+              saved:
+                summary: Personal saved-messages chat
+                value:
+                  type: saved
+              direct:
+                summary: Direct chat with another user
+                value:
+                  type: direct
+                  member_ids:
+                  - 550e8400-e29b-41d4-a716-446655440001
+              group:
+                summary: Group chat with initial members
+                value:
+                  type: group
+                  title: Project Team
+                  member_ids:
+                  - 550e8400-e29b-41d4-a716-446655440001
+                  - 550e8400-e29b-41d4-a716-446655440002
       responses:
         "201":
-          description: ""
+          description: Chat created
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ChatDto"
+        "401":
+          description: Missing or invalid JWT token
       security:
       - jwt: []
     get:
       tags:
       - Chats
-      summary: ""
+      summary: Get my chats
+      description: Returns a paginated list of all chats the current user is a member of.
       parameters:
       - name: page
         in: query
+        description: Page number (0-based)
         schema:
-          type: string
+          type: integer
+          format: int32
+          default: 0
+          example: 0
       - name: size
         in: query
+        description: Number of items per page
         schema:
-          type: string
+          type: integer
+          format: int32
+          default: 20
+          example: 20
       responses:
         "200":
-          description: ""
+          description: Paginated list of chats
           content:
             application/json:
               schema:
@@ -55,117 +158,170 @@ paths:
                       $ref: "#/components/schemas/ChatDto"
                   page:
                     type: integer
+                    format: int32
                   size:
                     type: integer
+                    format: int32
                   total:
                     type: integer
+                    format: int64
+        "401":
+          description: Missing or invalid JWT token
       security:
       - jwt: []
   /api/v1/chats/{chat_id}:
     put:
       tags:
       - Chats
-      summary: ""
+      summary: Replace chat
+      description: Full replacement of chat properties. Only the owner can edit a chat.
       parameters:
       - name: chat_id
         in: path
+        description: Chat ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 42
       requestBody:
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/EditChatRequest"
+            example:
+              title: New Group Name
       responses:
         "200":
-          description: ""
+          description: Updated chat
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ChatDto"
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: Chat not found
       security:
       - jwt: []
     delete:
       tags:
       - Chats
-      summary: ""
+      summary: Delete chat
+      description: Permanently deletes the chat and all its messages. Only the owner can delete a chat.
       parameters:
       - name: chat_id
         in: path
+        description: Chat ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 42
       responses:
         "204":
-          description: ""
+          description: Chat deleted
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: Chat not found
       security:
       - jwt: []
     get:
       tags:
       - Chats
-      summary: ""
+      summary: Get chat
+      description: Returns details of a specific chat. The current user must be a member.
       parameters:
       - name: chat_id
         in: path
+        description: Chat ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 42
       responses:
         "200":
-          description: ""
+          description: Chat details
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ChatDto"
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: Chat not found
       security:
       - jwt: []
     patch:
       tags:
       - Chats
-      summary: ""
+      summary: Update chat
+      description: Partially updates chat properties. Only the owner can edit a chat.
       parameters:
       - name: chat_id
         in: path
+        description: Chat ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 42
       requestBody:
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/EditChatRequest"
+            example:
+              title: New Group Name
       responses:
         "200":
-          description: ""
+          description: Updated chat
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ChatDto"
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: Chat not found
       security:
       - jwt: []
   /api/v1/chats/{chat_id}/members:
     get:
       tags:
       - Chat Members
-      summary: ""
+      summary: Get members
+      description: Returns a paginated list of all members in the chat.
       parameters:
       - name: chat_id
         in: path
+        description: Chat ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 42
       - name: page
         in: query
+        description: Page number (0-based)
         schema:
-          type: string
+          type: integer
+          format: int32
+          default: 0
+          example: 0
       - name: size
         in: query
+        description: Number of items per page
         schema:
-          type: string
+          type: integer
+          format: int32
+          default: 20
+          example: 20
       responses:
         "200":
-          description: ""
+          description: Paginated list of members
           content:
             application/json:
               schema:
@@ -182,158 +338,245 @@ paths:
                       $ref: "#/components/schemas/ChatMemberDto"
                   page:
                     type: integer
+                    format: int32
                   size:
                     type: integer
+                    format: int32
                   total:
                     type: integer
+                    format: int64
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: Chat not found
       security:
       - jwt: []
   /api/v1/chats/{chat_id}/members/me:
     delete:
       tags:
       - Chat Members
-      summary: ""
+      summary: Leave chat
+      description: Removes the current user from the chat. The owner cannot leave — they must delete the chat first.
       parameters:
       - name: chat_id
         in: path
+        description: Chat ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 42
       responses:
         "204":
-          description: ""
+          description: Left the chat
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: Chat not found
       security:
       - jwt: []
     get:
       tags:
       - Chat Members
-      summary: ""
+      summary: Get my membership
+      description: Returns the current user's membership details in this chat, including their role.
       parameters:
       - name: chat_id
         in: path
+        description: Chat ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 42
       responses:
         "200":
-          description: ""
+          description: Current user's member info
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ChatMemberDto"
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: Chat not found or user is not a member
       security:
       - jwt: []
   /api/v1/chats/{chat_id}/members/{member_id}:
     post:
       tags:
       - Chat Members
-      summary: ""
+      summary: Invite user
+      description: Adds a user to the chat by their profile ID. Only the owner can invite new members.
       parameters:
       - name: chat_id
         in: path
+        description: Chat ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 42
       - name: member_id
         in: path
+        description: Profile ID of the user to invite
         required: true
         schema:
           type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440001
       responses:
         "204":
-          description: ""
+          description: User invited
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: Chat or user not found
       security:
       - jwt: []
     delete:
       tags:
       - Chat Members
-      summary: ""
+      summary: Kick user
+      description: Removes a user from the chat. Only the owner can kick members.
       parameters:
       - name: chat_id
         in: path
+        description: Chat ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 42
       - name: member_id
         in: path
+        description: Profile ID of the member to kick
         required: true
         schema:
           type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440001
       responses:
         "204":
-          description: ""
+          description: User removed
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: Chat or member not found
       security:
       - jwt: []
     get:
       tags:
       - Chat Members
-      summary: ""
+      summary: Get member
+      description: Returns membership details for a specific user in the chat.
       parameters:
       - name: chat_id
         in: path
+        description: Chat ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 42
       - name: member_id
         in: path
+        description: Profile ID of the member
         required: true
         schema:
           type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440001
       responses:
         "200":
-          description: ""
+          description: Member details
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ChatMemberDto"
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: Chat or member not found
       security:
       - jwt: []
   /api/v1/chats/{chat_id}/messages:
     post:
       tags:
       - Chat Messages
-      summary: ""
+      summary: Send message
+      description: 'Sends a message to the chat. Set `encrypted: true` and pass Base64-encoded ciphertext as `content` for end-to-end encrypted messages.'
       parameters:
       - name: chat_id
         in: path
+        description: Chat ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 42
       requestBody:
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/SendMessageRequest"
+            examples:
+              plain:
+                summary: Plain-text message
+                value:
+                  content: Hello, world!
+                  encrypted: false
+              encrypted:
+                summary: E2E encrypted message
+                value:
+                  content: BASE64_ENCODED_CIPHERTEXT==
+                  encrypted: true
       responses:
         "201":
-          description: ""
+          description: Message sent
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ChatMessageDto"
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: Chat not found
       security:
       - jwt: []
     get:
       tags:
       - Chat Messages
-      summary: ""
+      summary: Get messages
+      description: Returns a paginated list of messages in the chat, newest first.
       parameters:
       - name: chat_id
         in: path
+        description: Chat ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 42
       - name: page
         in: query
+        description: Page number (0-based)
         schema:
-          type: string
+          type: integer
+          format: int32
+          default: 0
+          example: 0
       - name: size
         in: query
+        description: Number of items per page
         schema:
-          type: string
+          type: integer
+          format: int32
+          default: 20
+          example: 20
       responses:
         "200":
-          description: ""
+          description: Paginated list of messages
           content:
             application/json:
               schema:
@@ -350,176 +593,256 @@ paths:
                       $ref: "#/components/schemas/ChatMessageDto"
                   page:
                     type: integer
+                    format: int32
                   size:
                     type: integer
+                    format: int32
                   total:
                     type: integer
+                    format: int64
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: Chat not found
       security:
       - jwt: []
   /api/v1/chats/{chat_id}/messages/{message_id}:
     put:
       tags:
       - Chat Messages
-      summary: ""
+      summary: Replace message
+      description: Full replacement of message content. Only the sender can edit their own messages.
       parameters:
       - name: chat_id
         in: path
+        description: Chat ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 42
       - name: message_id
         in: path
+        description: Message ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 101
       requestBody:
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/EditMessageRequest"
+            example:
+              content: Updated message text
       responses:
         "200":
-          description: ""
+          description: Updated message
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ChatMessageDto"
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: Chat or message not found
       security:
       - jwt: []
     delete:
       tags:
       - Chat Messages
-      summary: ""
+      summary: Delete message
+      description: Permanently deletes a message. Only the sender can delete their own messages.
       parameters:
       - name: chat_id
         in: path
+        description: Chat ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 42
       - name: message_id
         in: path
+        description: Message ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 101
       responses:
         "204":
-          description: ""
+          description: Message deleted
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: Chat or message not found
       security:
       - jwt: []
     get:
       tags:
       - Chat Messages
-      summary: ""
+      summary: Get message
+      description: Returns a specific message by ID.
       parameters:
       - name: chat_id
         in: path
+        description: Chat ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 42
       - name: message_id
         in: path
+        description: Message ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 101
       responses:
         "200":
-          description: ""
+          description: Message details
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ChatMessageDto"
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: Chat or message not found
       security:
       - jwt: []
     patch:
       tags:
       - Chat Messages
-      summary: ""
+      summary: Edit message
+      description: Partially updates a message. Only the sender can edit their own messages.
       parameters:
       - name: chat_id
         in: path
+        description: Chat ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 42
       - name: message_id
         in: path
+        description: Message ID
         required: true
         schema:
-          type: string
+          type: integer
+          format: int64
+          example: 101
       requestBody:
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/EditMessageRequest"
+            example:
+              content: Updated message text
       responses:
         "200":
-          description: ""
+          description: Updated message
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ChatMessageDto"
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: Chat or message not found
       security:
       - jwt: []
   /api/v1/keys:
     put:
       tags:
       - E2E Keys
-      summary: ""
+      summary: Upload public key
+      description: Uploads or replaces the current user's RSA public key used for end-to-end encryption. The key should be in PEM format.
       requestBody:
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/UpsertPublicKeyRequest"
+            example:
+              publicKey: "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...\n-----END PUBLIC KEY-----"
       responses:
         "200":
-          description: ""
+          description: Key saved
+        "401":
+          description: Missing or invalid JWT token
       security:
       - jwt: []
   /api/v1/keys/{user_id}:
     get:
       tags:
       - E2E Keys
-      summary: ""
+      summary: Get user's public key
+      description: 'Retrieves the public key for a given user. Use this key to encrypt messages before sending them with `encrypted: true`. Returns 404 if the user has not yet uploaded a public key.'
       parameters:
       - name: user_id
         in: path
+        description: Profile ID of the user whose public key to retrieve
         required: true
         schema:
           type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440001
       responses:
         "200":
-          description: ""
+          description: User's public key
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserPublicKeyDto"
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: User has not uploaded a public key
       security:
       - jwt: []
   /api/v1/keys/backup:
     put:
       tags:
       - E2E Keys
-      summary: ""
+      summary: Upload key backup
+      description: Uploads or replaces the encrypted private key backup. Encrypt the private key client-side using PBKDF2 + AES-GCM before uploading. All values must be Base64-encoded.
       requestBody:
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/KeyBackupRequest"
+            example:
+              salt: c2FsdHZhbHVlaGVyZQ==
+              iv: aXZhbHVlaGVyZWZvcg==
+              ciphertext: Y2lwaGVydGV4dGhlcmU=
       responses:
         "200":
-          description: ""
+          description: Backup saved
+        "401":
+          description: Missing or invalid JWT token
       security:
       - jwt: []
     get:
       tags:
       - E2E Keys
-      summary: ""
+      summary: Get key backup
+      description: Retrieves the current user's encrypted private key backup. The server never stores the plaintext private key.
       responses:
         "200":
-          description: ""
+          description: Encrypted key backup
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyBackupDto"
+        "401":
+          description: Missing or invalid JWT token
+        "404":
+          description: No backup found for this user
       security:
       - jwt: []
 components:
@@ -528,68 +851,95 @@ components:
       type: object
       title: ChatMemberDto
       required:
-      - profileId
+      - profile_id
       - name
       - role
-      - joinedAt
+      - joined_at
       properties:
-        profileId:
+        profile_id:
           type: string
           format: uuid
+          description: Profile UUID of this member
+          example: 550e8400-e29b-41d4-a716-446655440001
         name:
           type: string
-        photoUrl:
+          description: Display name of the member
+          example: Alice
+        photo_url:
           type:
           - string
           - "null"
+          description: Profile photo URL (null if not set)
+          example: https://cdn.example.com/photos/alice.jpg
         role:
           type: string
+          description: Member's role in the chat
           enum:
           - owner
           - member
-        joinedAt:
+          example: member
+        joined_at:
           type: string
           format: date-time
+          description: Timestamp when the user joined
+          example: "2024-01-15T10:30:00Z"
     ChatDto:
       type: object
       title: ChatDto
       required:
       - id
       - type
-      - ownerId
+      - owner_id
       - members
-      - createdAt
-      - updatedAt
+      - created_at
+      - updated_at
       properties:
         id:
           type: integer
+          format: int64
+          description: Unique chat identifier
+          example: 42
         type:
           type: string
+          description: Chat type
           enum:
           - saved
           - direct
           - group
+          example: group
         title:
           type:
           - string
           - "null"
-        ownerId:
+          description: Chat display title (only for group chats; null for saved/direct)
+          example: Project Team
+        owner_id:
           type: string
           format: uuid
+          description: Profile UUID of the chat owner
+          example: 550e8400-e29b-41d4-a716-446655440000
         members:
           type: array
+          description: List of current members
           items:
             $ref: "#/components/schemas/ChatMemberDto"
-        lastMessageId:
+        last_message_id:
           type:
           - integer
           - "null"
-        createdAt:
+          format: int64
+          description: ID of the last message sent (null if no messages yet)
+          example: 101
+        created_at:
           type: string
           format: date-time
-        updatedAt:
+          description: Timestamp when the chat was created
+          example: "2024-01-15T10:00:00Z"
+        updated_at:
           type: string
           format: date-time
+          description: Timestamp of the last modification
+          example: "2024-01-15T10:30:00Z"
     CreateChatRequest:
       type: object
       title: CreateChatRequest
@@ -598,19 +948,26 @@ components:
       properties:
         type:
           type: string
+          description: Type of chat to create
           enum:
           - saved
           - direct
           - group
+          example: group
         title:
           type:
           - string
           - "null"
-        memberIds:
+          description: Optional title for group chats
+          example: Project Team
+        member_ids:
           type: array
+          description: Profile IDs to invite on creation (for direct and group chats)
           items:
             type: string
             format: uuid
+          example:
+          - 550e8400-e29b-41d4-a716-446655440001
     EditChatRequest:
       type: object
       title: EditChatRequest
@@ -619,6 +976,8 @@ components:
           type:
           - string
           - "null"
+          description: New title for the chat (null to remove)
+          example: New Group Name
     ChatMessageDto:
       type: object
       title: ChatMessageDto
@@ -627,25 +986,38 @@ components:
       - chat
       - sender
       - content
-      - createdAt
-      - updatedAt
+      - created_at
+      - updated_at
       properties:
         id:
           type: integer
+          format: int64
+          description: Unique message identifier
+          example: 101
         chat:
+          description: The chat this message belongs to
           $ref: "#/components/schemas/ChatDto"
         sender:
+          description: Member who sent the message
           $ref: "#/components/schemas/ChatMemberDto"
         content:
           type: string
+          description: Message text, or Base64-encoded ciphertext if encrypted
+          example: Hello, world!
         encrypted:
           type: boolean
-        createdAt:
+          description: Whether the message content is end-to-end encrypted
+          example: false
+        created_at:
           type: string
           format: date-time
-        updatedAt:
+          description: Timestamp when the message was sent
+          example: "2024-01-15T10:30:00Z"
+        updated_at:
           type: string
           format: date-time
+          description: Timestamp of the last edit
+          example: "2024-01-15T10:30:00Z"
     SendMessageRequest:
       type: object
       title: SendMessageRequest
@@ -654,8 +1026,12 @@ components:
       properties:
         content:
           type: string
+          description: Message text, or Base64-encoded ciphertext when encrypted
+          example: Hello, world!
         encrypted:
           type: boolean
+          description: Set to true to mark the message as E2E encrypted
+          example: false
     EditMessageRequest:
       type: object
       title: EditMessageRequest
@@ -664,26 +1040,34 @@ components:
       properties:
         content:
           type: string
+          description: New message text, or Base64-encoded ciphertext if encrypted
+          example: Updated message text
     UpsertPublicKeyRequest:
       type: object
       title: UpsertPublicKeyRequest
       required:
-      - publicKey
+      - public_key
       properties:
-        publicKey:
+        public_key:
           type: string
+          description: RSA public key in PEM format
+          example: "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...\n-----END PUBLIC KEY-----"
     UserPublicKeyDto:
       type: object
       title: UserPublicKeyDto
       required:
-      - userId
-      - publicKey
+      - user_id
+      - public_key
       properties:
-        userId:
+        user_id:
           type: string
           format: uuid
-        publicKey:
+          description: Profile UUID of the key owner
+          example: 550e8400-e29b-41d4-a716-446655440001
+        public_key:
           type: string
+          description: RSA public key in PEM format
+          example: "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...\n-----END PUBLIC KEY-----"
     KeyBackupRequest:
       type: object
       title: KeyBackupRequest
@@ -694,10 +1078,16 @@ components:
       properties:
         salt:
           type: string
+          description: PBKDF2 salt (Base64-encoded)
+          example: c2FsdHZhbHVlaGVyZQ==
         iv:
           type: string
+          description: AES-GCM initialization vector (Base64-encoded)
+          example: aXZhbHVlaGVyZWZvcg==
         ciphertext:
           type: string
+          description: AES-GCM encrypted private key (Base64-encoded)
+          example: Y2lwaGVydGV4dGhlcmU=
     KeyBackupDto:
       type: object
       title: KeyBackupDto
@@ -708,13 +1098,19 @@ components:
       properties:
         salt:
           type: string
+          description: PBKDF2 salt (Base64-encoded)
+          example: c2FsdHZhbHVlaGVyZQ==
         iv:
           type: string
+          description: AES-GCM initialization vector (Base64-encoded)
+          example: aXZhbHVlaGVyZWZvcg==
         ciphertext:
           type: string
+          description: AES-GCM encrypted private key (Base64-encoded)
+          example: Y2lwaGVydGV4dGhlcmU=
   securitySchemes:
     jwt:
+      type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT Bearer Authentication
-      type: http
+      description: "JWT Bearer token issued by the auth-service. Pass as `Authorization: Bearer <token>`."
