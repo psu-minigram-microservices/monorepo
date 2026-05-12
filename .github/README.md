@@ -14,14 +14,31 @@
 | frontend-service | Сервис фронтенда      | [frontend-service](https://github.com/psu-minigram-microservices/frontend-service)             |
 | profile-service  | Сервис профилей       | [profiles-service](https://github.com/psu-minigram-microservices/profiles-service)             |
 
-### Конфигурация (.env)
-
-В корне репозитория находится файл `.env.example` — шаблон переменных окружения для всех сервисов.<br>
-Скопируйте его в `.env` и заполните нужными значениями:
+### Быстрый старт
 
 ```bash
+git clone --recurse-submodules https://github.com/psu-minigram-microservices/monorepo
+cd monorepo
 cp .env.example .env
+cp config/Caddyfile.example config/Caddyfile
+# заполните .env
+docker compose up -d
 ```
+
+Для запуска с конкретными версиями сервисов:
+
+```bash
+AUTH_TAG=v1.0.0 CHATS_TAG=v2.1.0 FRONTEND_TAG=v1.3.0 PROFILE_TAG=v1.1.0 docker compose up -d
+```
+
+### Конфигурация Caddy (reverse proxy)
+
+В директории `config/` находится файл `Caddyfile.example` — шаблон конфигурации reverse proxy.
+
+- `localhost` — dev-режим (HTTP only, порт 80)
+- Замените на доменное имя (например, `minigram.example.com`) для автоматического HTTPS через Let's Encrypt
+
+### Переменные окружения
 
 | Переменная              | Описание                                      | По умолчанию       |
 |-------------------------|-----------------------------------------------|--------------------|
@@ -50,31 +67,3 @@ cp .env.example .env
 | `PROFILE_DB_USER`       | Пользователь БД                               | `minigram`         |
 | `PROFILE_DB_PASSWORD`   | Пароль БД                                     | `minigram`         |
 | `PROFILE_DB_PORT`       | Порт PostgreSQL                               | `5433`             |
-
-### Конфигурация Caddy (reverse proxy)
-
-В директории `config/` находится файл `Caddyfile.example` — шаблон конфигурации reverse proxy.<br>
-Скопируйте его в `Caddyfile` и при необходимости измените:
-
-```bash
-cp config/Caddyfile.example config/Caddyfile
-```
-
-- `localhost` — dev-режим (HTTP only, порт 80)
-- Замените на доменное имя (например, `minigram.example.com`) для автоматического HTTPS через Let's Encrypt
-
-### Быстрый старт
-
-```bash
-git clone --recurse-submodules https://github.com/psu-minigram-microservices/monorepo
-cd monorepo
-cp .env.example .env
-# заполните .env
-docker compose up -d
-```
-
-Для запуска с конкретными версиями сервисов:
-
-```bash
-AUTH_TAG=v1.0.0 CHATS_TAG=v2.1.0 FRONTEND_TAG=v1.3.0 PROFILE_TAG=v1.1.0 docker compose up -d
-```
