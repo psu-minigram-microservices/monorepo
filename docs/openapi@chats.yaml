@@ -43,18 +43,22 @@ paths:
       - Real-time
       summary: WebSocket connection
       description: |
-        Establishes a WebSocket connection for real-time chat events.
+        Establishes a plain WebSocket connection for real-time chat events.
 
         Pass the JWT token as a query parameter: `?token=<jwt>`
 
-        Events pushed over the socket:
-        - `message.new` — a new message was sent
-        - `message.edited` — a message was updated
-        - `message.deleted` — a message was deleted
-        - `chat.created` — a new chat was created
-        - `chat.updated` — chat metadata changed
-        - `member.joined` — a user joined a chat
-        - `member.left` — a user left a chat
+        The server pushes JSON messages directly over the socket (no STOMP).
+        Each message has the shape `{ "type": "...", "chat_id": <id>, "payload": ... }`.
+
+        Event types:
+        - `MESSAGE_SENT` — a new message was sent
+        - `MESSAGE_EDITED` — a message was updated
+        - `MESSAGE_DELETED` — a message was deleted (payload is the message ID)
+        - `CHAT_CREATED` — a new chat was created
+        - `CHAT_UPDATED` — chat metadata changed
+        - `CHAT_DELETED` — a chat was deleted
+        - `MEMBER_JOINED` — a user joined a chat
+        - `MEMBER_LEFT` — a user left a chat (payload is the user UUID)
       parameters:
       - name: token
         in: query
@@ -769,7 +773,7 @@ paths:
             schema:
               $ref: "#/components/schemas/UpsertPublicKeyRequest"
             example:
-              publicKey: "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...\n-----END PUBLIC KEY-----"
+              public_key: "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...\n-----END PUBLIC KEY-----"
       responses:
         "200":
           description: Key saved
